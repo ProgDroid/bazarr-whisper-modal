@@ -1,0 +1,3 @@
+# Only needed locally to deploy/run the Modal app. The GPU container itself
+# uses the onerahmet/openai-whisper-asr-webservice image, not these.
+modal>=1.0

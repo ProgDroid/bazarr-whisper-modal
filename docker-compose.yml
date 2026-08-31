@@ -1,0 +1,35 @@
+# Runs the Bazarr<->Modal shim next to Bazarr.
+#
+# Easiest integration: paste the `whisper-shim` service into your EXISTING Bazarr
+# docker-compose.yml so they share a network, then point Bazarr at
+# http://whisper-shim:9000. Or run this file standalone and attach it to Bazarr's
+# network via the `networks` block at the bottom.
+
+services:
+  whisper-shim:
+    # Pulled from GHCR (published by .github/workflows/build-shim.yml).
+    # To build locally instead, comment `image:` and uncomment `build: ./shim`.
+    image: ghcr.io/progdroid/bazarr-whisper-shim:latest
+    # build: ./shim
+    container_name: whisper-shim
+    restart: unless-stopped
+    environment:
+      # Create these at https://modal.com/settings/tokens and put them in a .env
+      # file next to this compose file (MODAL_TOKEN_ID=..., MODAL_TOKEN_SECRET=...).
+      MODAL_TOKEN_ID: ${MODAL_TOKEN_ID}
+      MODAL_TOKEN_SECRET: ${MODAL_TOKEN_SECRET}
+      MODAL_APP_NAME: bazarr-whisper
+    ports:
+      # Only needed if Bazarr reaches the shim by host IP rather than by service
+      # name. If Bazarr is on the same compose network, drop this and use
+      # http://whisper-shim:9000.
+      - "9000:9000"
+
+# --- Standalone-only: attach to Bazarr's existing network -------------------
+# Uncomment and set <bazarr_network> to your Bazarr stack's network
+# (find it with `docker network ls`). Then Bazarr can reach http://whisper-shim:9000.
+#
+# networks:
+#   default:
+#     name: <bazarr_network>
+#     external: true
